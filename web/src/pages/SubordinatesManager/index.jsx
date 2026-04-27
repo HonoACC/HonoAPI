@@ -19,38 +19,28 @@ For commercial licensing, please contact support@quantumnous.com
 
 import React, { useEffect, useState } from 'react';
 import { API, showError, showSuccess } from '../../helpers';
-import UsersDescription from '../../components/table/users/UsersDescription';
-import UsersFilters from '../../components/table/users/UsersFilters';
-import UsersActions from '../../components/table/users/UsersActions';
-import UsersTable from '../../components/table/users/UsersTable';
-import EditUserModal from '../../components/table/users/modals/EditUserModal';
 import { useTranslation } from 'react-i18next';
-import { Modal, Form, Input } from '@douyinfe/semi-ui';
+import { Modal, Form, Card, Table, Button, Space, Typography, Tag } from '@douyinfe/semi-ui';
+import { IconPlus } from '@douyinfe/semi-icons';
+import { renderGroup, renderQuota } from '../../helpers';
+
+const { Text } = Typography;
 
 const SubordinatesManager = () => {
   const { t } = useTranslation();
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [activePage, setActivePage] = useState(1);
-  const [searchKeyword, setSearchKeyword] = useState('');
-  const [searchGroup, setSearchGroup] = useState('');
-  const [userCount, setUserCount] = useState(0);
-  const [pageSize, setPageSize] = useState(10);
-  const [showEditUser, setShowEditUser] = useState(false);
   const [showAddUser, setShowAddUser] = useState(false);
-  const [editingUser, setEditingUser] = useState(null);
   const [quotaPool, setQuotaPool] = useState(0);
   const [addUsername, setAddUsername] = useState('');
 
-  const loadUsers = async (startIdx) => {
+  const loadUsers = async () => {
     setLoading(true);
     try {
-      const res = await API.get(`/api/user/manager/subordinates`);
+      const res = await API.get('/api/user/manager/subordinates');
       const { success, data, message } = res.data;
       if (success) {
-        const usersWithRelation = data || [];
-        setUsers(usersWithRelation);
-        setUserCount(usersWithRelation.length);
+        setUsers(data || []);
       } else {
         showError(message);
       }
@@ -73,33 +63,13 @@ const SubordinatesManager = () => {
   };
 
   useEffect(() => {
-    loadUsers(0);
+    loadUsers();
     loadQuotaPool();
   }, []);
 
   const refresh = async () => {
-    await loadUsers((activePage - 1) * pageSize);
+    await loadUsers();
     await loadQuotaPool();
-  };
-
-  const handlePageChange = (page) => {
-    setActivePage(page);
-    loadUsers((page - 1) * pageSize);
-  };
-
-  const handlePageSizeChange = (size) => {
-    setPageSize(size);
-    setActivePage(1);
-    loadUsers(0);
-  };
-
-  const handleRow = (record, index) => {
-    return {
-      onClick: (event) => {
-        setEditingUser(record);
-        setShowEditUser(true);
-      },
-    };
   };
 
   const handleAddSubordinate = async () => {
@@ -123,100 +93,83 @@ const SubordinatesManager = () => {
     }
   };
 
-  const manageUser = async (username, action, value) => {
-    // 下级管理不支持这些操作
-    return;
-  };
-
-  const resetUserPasskey = async (userId) => {
-    // 下级管理不支持
-    return;
-  };
-
-  const resetUserTwoFA = async (userId) => {
-    // 下级管理不支持
-    return;
-  };
-
-  // 过滤用户（本地过滤）
-  const filteredUsers = users.filter((user) => {
-    if (searchKeyword && !user.username.includes(searchKeyword) && !user.display_name?.includes(searchKeyword)) {
-      return false;
-    }
-    if (searchGroup && user.group !== searchGroup) {
-      return false;
-    }
-    return true;
-  });
+  const columns = [
+    { title: 'ID', dataIndex: 'id', width: 80 },
+    { title: t('用户名'), dataIndex: 'username', width: 150 },
+    { title: t('显示名称'), dataIndex: 'display_name', width: 150 },
+    { 
+      title: t('剩余额度'), 
+      dataIndex: 'quota', 
+      render: (quota) => <Text>{renderQuota(quota)}</Text> 
+    },
+    { 
+      title: t('已用额度'), 
+      dataIndex: 'used_quota', 
+      render: (used_quota) => <Text>{renderQuota(used_quota)}</Text> 
+    },
+    { 
+      title: t('分组'), 
+      dataIndex: 'group', 
+      render: (group) => <div>{renderGroup(group)}</div> 
+    },
+    { 
+      title: t('状态'), 
+      dataIndex: 'status', 
+      width: 100, 
+      render: (status) => status === 1 ? <Tag color='green'>{t('已启用')}</Tag> : <Tag color='red'>{t('已禁用')}</Tag> 
+    },
+    { 
+      title: t('备注'), 
+      dataIndex: 'note', 
+      width: 200, 
+      render: (note) => <Text ellipsis={{ showTooltip: true }}>{note || '-'}</Text> 
+    },
+  ];
 
   return (
     <div className='mt-[60px] px-2'>
-      <UsersDescription 
-        title="下级管理" 
-        quotaPool={quotaPool}
-        showQuotaPool={true}
-        t={t}
-      />
-      <UsersFilters
-        searchKeyword={searchKeyword}
-        setSearchKeyword={setSearchKeyword}
-        searchGroup={searchGroup}
-        setSearchGroup={setSearchGroup}
-        refresh={refresh}
-        t={t}
-      />
-      <UsersActions
-        setShowAddUser={setShowAddUser}
-        addButtonText="添加下级"
-        isSubordinateMode={true}
-        t={t}
-      />
-      <UsersTable
-        users={filteredUsers}
-        loading={loading}
-        activePage={activePage}
-        pageSize={pageSize}
-        userCount={filteredUsers.length}
-        compactMode={false}
-        handlePageChange={handlePageChange}
-        handlePageSizeChange={handlePageSizeChange}
-        handleRow={handleRow}
-        setEditingUser={setEditingUser}
-        setShowEditUser={setShowEditUser}
-        manageUser={manageUser}
-        refresh={refresh}
-        resetUserPasskey={resetUserPasskey}
-        resetUserTwoFA={resetUserTwoFA}
-        currentUserRole={5}
-        quotaPool={quotaPool}
-        t={t}
-        isSubordinateMode={true}
-      />
-      {showEditUser && (
-        <EditUserModal
-          editingUser={editingUser}
-          showEditUser={showEditUser}
-          setShowEditUser={setShowEditUser}
-          refresh={refresh}
-          isSubordinateMode={true}
+      <div className='flex items-center gap-4 mb-4'>
+        <Text strong size='large'>{t('下级管理')}</Text>
+        <Text type='tertiary'>
+          {t('当前可用额度池')}：{renderQuota(quotaPool)}
+        </Text>
+      </div>
+      <Card 
+        title={t('下级用户列表')} 
+        headerExtraContent={
+          <Button 
+            icon={<IconPlus />} 
+            type='primary' 
+            onClick={() => setShowAddUser(true)}
+          >
+            {t('添加下级')}
+          </Button>
+        }
+      >
+        <Table 
+          columns={columns} 
+          dataSource={users} 
+          loading={loading} 
+          pagination={false} 
+          rowKey='id' 
         />
-      )}
+      </Card>
       <Modal
-        title="添加下级用户"
+        title={t('添加下级用户')}
         visible={showAddUser}
         onOk={handleAddSubordinate}
         onCancel={() => {
           setShowAddUser(false);
           setAddUsername('');
         }}
-        okText="添加"
-        cancelText="取消"
+        okText={t('添加')}
+        cancelText={t('取消')}
       >
         <Form>
           <Form.Input
             field="username"
-            label="用户名"
-            placeholder="请输入用户名"
+            label={t('用户名')}
+            placeholder={t('请输入用户名')}
             value={addUsername}
             onChange={setAddUsername}
           />
