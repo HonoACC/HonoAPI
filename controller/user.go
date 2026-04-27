@@ -1523,6 +1523,11 @@ func RechargeSubordinate(c *gin.Context) {
 
 	// 开启事务
 	tx := model.DB.Begin()
+	defer func() {
+		if r := recover(); r != nil {
+			tx.Rollback()
+		}
+	}()
 
 	// 扣除管理员的额度池
 	if err := tx.Model(&manager).Update("quota_pool", gorm.Expr("quota_pool - ?", req.Amount)).Error; err != nil {
@@ -1531,8 +1536,8 @@ func RechargeSubordinate(c *gin.Context) {
 		return
 	}
 
-	// 增加目标用户额度
-	if err := model.IncreaseUserQuota(req.UserId, req.Amount, true); err != nil {
+	// 增加目标用户额度（在事务中）
+	if err := tx.Model(&model.User{}).Where("id = ?", req.UserId).Update("quota", gorm.Expr("quota + ?", req.Amount)).Error; err != nil {
 		tx.Rollback()
 		common.ApiError(c, err)
 		return
