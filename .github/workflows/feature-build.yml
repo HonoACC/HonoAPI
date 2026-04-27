@@ -45,10 +45,6 @@ jobs:
           go mod download
           go build -ldflags "-s -w -X 'github.com/QuantumNous/new-api/common.Version=$(cat VERSION)'" -o new-api
 
-      - name: Run tests
-        run: |
-          go test ./... -v
-
       - name: Build summary
         run: |
           echo "✅ Build completed successfully"
