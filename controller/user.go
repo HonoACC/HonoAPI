@@ -1540,12 +1540,13 @@ func RechargeSubordinate(c *gin.Context) {
 
 	// 创建充值记录
 	topUp := &model.TopUp{
-		UserId:       req.UserId,
-		Amount:       req.Amount,
-		Key:          fmt.Sprintf("manager_%d_%d", managerId, common.GetTimestamp()),
-		CreatedTime:  common.GetTimestamp(),
-		Status:       1,
-		RechargeType: "manager",
+		UserId:          req.UserId,
+		Amount:          int64(req.Amount),
+		TradeNo:         fmt.Sprintf("manager_%d_%d", managerId, common.GetTimestamp()),
+		CreateTime:      common.GetTimestamp(),
+		Status:          "completed",
+		PaymentMethod:   "manager",
+		PaymentProvider: "manager",
 	}
 	if err := tx.Create(topUp).Error; err != nil {
 		tx.Rollback()
