@@ -130,7 +130,7 @@ function Subordinates() {
 
   return (
     <>
-      <div style={{ padding: '20px' }}>
+      <div className='mt-[60px] px-2'>
         <Banner type='info' description={'当前可用额度池：' + (quotaPool / 500000).toFixed(2) + ' 元'} closeIcon={null} style={{ marginBottom: '20px' }} />
         <Card title='下级管理' headerExtraContent={<Button icon={<IconPlus />} type='primary' onClick={() => setAddModalVisible(true)}>添加下级</Button>}>
           <Table columns={columns} dataSource={subordinates} loading={loading} pagination={false} rowKey='id' />
