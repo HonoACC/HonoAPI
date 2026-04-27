@@ -185,12 +185,6 @@ const SiderBar = ({ onNavigate = () => {} }) => {
         className: isAdmin() ? '' : 'tableHiddle',
       },
       {
-        text: t('下级管理'),
-        itemKey: 'subordinates',
-        to: '/subordinates',
-        className: isUserManager() && !isAdmin() ? '' : 'tableHiddle',
-      },
-      {
         text: t('系统设置'),
         itemKey: 'setting',
         to: '/setting',
@@ -478,6 +472,23 @@ const SiderBar = ({ onNavigate = () => {} }) => {
                   <div className='sidebar-group-label'>{t('个人中心')}</div>
                 )}
                 {financeItems.map((item) => renderNavItem(item))}
+              </div>
+            </>
+          )}
+
+          {/* UserManager 区域 - 只在 UserManager 且非管理员时显示 */}
+          {isUserManager() && !isAdmin() && (
+            <>
+              <Divider className='sidebar-divider' />
+              <div>
+                {!collapsed && (
+                  <div className='sidebar-group-label'>{t('用户管理')}</div>
+                )}
+                <Nav.Item
+                  itemKey='subordinates'
+                  text={t('下级管理')}
+                  icon={getLucideIcon('Users')}
+                />
               </div>
             </>
           )}
