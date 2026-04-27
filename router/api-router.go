@@ -112,30 +112,30 @@ func SetApiRouter(router *gin.Engine) {
 				// Custom OAuth bindings
 				selfRoute.GET("/oauth/bindings", controller.GetUserOAuthBindings)
 				selfRoute.DELETE("/oauth/bindings/:provider_id", controller.UnbindCustomOAuth)
-			}
+		}
 
 		adminRoute := userRoute.Group("/")
 		adminRoute.Use(middleware.UserManagerAuth())
 		{
-				adminRoute.GET("/", controller.GetAllUsers)
-				adminRoute.GET("/topup", controller.GetAllTopUps)
-				adminRoute.POST("/topup/complete", controller.AdminCompleteTopUp)
-				adminRoute.GET("/search", controller.SearchUsers)
-				adminRoute.GET("/:id/oauth/bindings", controller.GetUserOAuthBindingsByAdmin)
-				adminRoute.DELETE("/:id/oauth/bindings/:provider_id", controller.UnbindCustomOAuthByAdmin)
-				adminRoute.DELETE("/:id/bindings/:binding_type", controller.AdminClearUserBinding)
-				adminRoute.GET("/:id", controller.GetUser)
-				adminRoute.POST("/", controller.CreateUser)
-				adminRoute.POST("/manage", controller.ManageUser)
-				adminRoute.PUT("/", controller.UpdateUser)
-				adminRoute.DELETE("/:id", controller.DeleteUser)
-				adminRoute.DELETE("/:id/reset_passkey", controller.AdminResetPasskey)
+			adminRoute.GET("/", controller.GetAllUsers)
+			adminRoute.GET("/topup", controller.GetAllTopUps)
+			adminRoute.POST("/topup/complete", controller.AdminCompleteTopUp)
+			adminRoute.GET("/search", controller.SearchUsers)
+			adminRoute.GET("/:id/oauth/bindings", controller.GetUserOAuthBindingsByAdmin)
+			adminRoute.DELETE("/:id/oauth/bindings/:provider_id", controller.UnbindCustomOAuthByAdmin)
+			adminRoute.DELETE("/:id/bindings/:binding_type", controller.AdminClearUserBinding)
+			adminRoute.GET("/:id", controller.GetUser)
+			adminRoute.POST("/", controller.CreateUser)
+			adminRoute.POST("/manage", controller.ManageUser)
+			adminRoute.PUT("/", controller.UpdateUser)
+			adminRoute.DELETE("/:id", controller.DeleteUser)
+			adminRoute.DELETE("/:id/reset_passkey", controller.AdminResetPasskey)
 
-				// Admin 2FA routes
-				adminRoute.GET("/2fa/stats", controller.Admin2FAStats)
-				adminRoute.DELETE("/:id/2fa", controller.AdminDisable2FA)
-			}
+			// Admin 2FA routes
+			adminRoute.GET("/2fa/stats", controller.Admin2FAStats)
+			adminRoute.DELETE("/:id/2fa", controller.AdminDisable2FA)
 		}
+	}
 
 		// Subscription billing (plans, purchase, admin management)
 		subscriptionRoute := apiRouter.Group("/subscription")
