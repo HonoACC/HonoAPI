@@ -850,6 +850,14 @@ type ManageRequest struct {
 
 // ManageUser Only admin user can do this
 func ManageUser(c *gin.Context) {
+	myRole := c.GetInt("role")
+	
+	// 如果是 UserManager (role=5)，使用受限逻辑
+	if myRole == common.RoleUserManager {
+		ManageUserLimited(c)
+		return
+	}
+	
 	var req ManageRequest
 	err := json.NewDecoder(c.Request.Body).Decode(&req)
 
@@ -866,7 +874,6 @@ func ManageUser(c *gin.Context) {
 		common.ApiErrorI18n(c, i18n.MsgUserNotExists)
 		return
 	}
-	myRole := c.GetInt("role")
 	if myRole <= user.Role && myRole != common.RoleRootUser {
 		common.ApiErrorI18n(c, i18n.MsgUserNoPermissionHigherLevel)
 		return

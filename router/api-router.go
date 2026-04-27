@@ -114,37 +114,29 @@ func SetApiRouter(router *gin.Engine) {
 				selfRoute.DELETE("/oauth/bindings/:provider_id", controller.UnbindCustomOAuth)
 		}
 
-		userManagerRoute := userRoute.Group("/")
-		userManagerRoute.Use(middleware.UserManagerAuth())
-		{
-			userManagerRoute.GET("/", controller.GetAllUsers)           // 查看用户列表
-			userManagerRoute.GET("/search", controller.SearchUsers)     // 搜索用户
-			userManagerRoute.POST("/", controller.CreateUser)           // 创建用户
-			userManagerRoute.POST("/manage", controller.ManageUserLimited) // 受限的用户管理（只能增加额度）
-		}
-
-		adminRoute := userRoute.Group("/")
-			adminRoute.Use(middleware.AdminAuth())
-			{
-				adminRoute.GET("/", controller.GetAllUsers)
-				adminRoute.GET("/topup", controller.GetAllTopUps)
-				adminRoute.POST("/topup/complete", controller.AdminCompleteTopUp)
-				adminRoute.GET("/search", controller.SearchUsers)
-				adminRoute.GET("/:id/oauth/bindings", controller.GetUserOAuthBindingsByAdmin)
-				adminRoute.DELETE("/:id/oauth/bindings/:provider_id", controller.UnbindCustomOAuthByAdmin)
-				adminRoute.DELETE("/:id/bindings/:binding_type", controller.AdminClearUserBinding)
-				adminRoute.GET("/:id", controller.GetUser)
-				adminRoute.POST("/", controller.CreateUser)
-				adminRoute.POST("/manage", controller.ManageUser)
-				adminRoute.PUT("/", controller.UpdateUser)
-				adminRoute.DELETE("/:id", controller.DeleteUser)
-				adminRoute.DELETE("/:id/reset_passkey", controller.AdminResetPasskey)
-
-				// Admin 2FA routes
-				adminRoute.GET("/2fa/stats", controller.Admin2FAStats)
-				adminRoute.DELETE("/:id/2fa", controller.AdminDisable2FA)
-			}
-		}
+	// User management routes (role >= 5: UserManager and Admin)
+	userMgmtRoute := userRoute.Group("/")
+	userMgmtRoute.Use(middleware.UserManagerAuth())
+	{
+		// 所有 UserManager 和 Admin 都可以访问
+		userMgmtRoute.GET("/", controller.GetAllUsers)
+		userMgmtRoute.GET("/search", controller.SearchUsers)
+		userMgmtRoute.POST("/", controller.CreateUser)
+		userMgmtRoute.POST("/manage", controller.ManageUser) // 内部会根据角色调用不同逻辑
+		
+		// 仅 Admin 可以访问（在控制器内部检查权限）
+		userMgmtRoute.GET("/topup", controller.GetAllTopUps)
+		userMgmtRoute.POST("/topup/complete", controller.AdminCompleteTopUp)
+		userMgmtRoute.GET("/:id/oauth/bindings", controller.GetUserOAuthBindingsByAdmin)
+		userMgmtRoute.DELETE("/:id/oauth/bindings/:provider_id", controller.UnbindCustomOAuthByAdmin)
+		userMgmtRoute.DELETE("/:id/bindings/:binding_type", controller.AdminClearUserBinding)
+		userMgmtRoute.GET("/:id", controller.GetUser)
+		userMgmtRoute.PUT("/", controller.UpdateUser)
+		userMgmtRoute.DELETE("/:id", controller.DeleteUser)
+		userMgmtRoute.DELETE("/:id/reset_passkey", controller.AdminResetPasskey)
+		userMgmtRoute.GET("/2fa/stats", controller.Admin2FAStats)
+		userMgmtRoute.DELETE("/:id/2fa", controller.AdminDisable2FA)
+	}
 
 		// Subscription billing (plans, purchase, admin management)
 		subscriptionRoute := apiRouter.Group("/subscription")
