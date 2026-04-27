@@ -100,17 +100,17 @@ const SubordinatesManager = () => {
     { 
       title: t('剩余额度'), 
       dataIndex: 'quota', 
-      render: (quota) => <Text>{renderQuota(quota)}</Text> 
+      render: (quota) => <Text>{renderQuota(quota || 0)}</Text> 
     },
     { 
       title: t('已用额度'), 
       dataIndex: 'used_quota', 
-      render: (used_quota) => <Text>{renderQuota(used_quota)}</Text> 
+      render: (used_quota) => <Text>{renderQuota(used_quota || 0)}</Text> 
     },
     { 
       title: t('分组'), 
       dataIndex: 'group', 
-      render: (group) => <div>{renderGroup(group)}</div> 
+      render: (group) => <div>{group ? renderGroup(group) : 'default'}</div> 
     },
     { 
       title: t('状态'), 
