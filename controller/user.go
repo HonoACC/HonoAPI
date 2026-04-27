@@ -1384,3 +1384,216 @@ func UpdateUserSetting(c *gin.Context) {
 
 	common.ApiSuccessI18n(c, i18n.MsgSettingSaved, nil)
 }
+
+// AddSubordinate 添加下级用户
+func AddSubordinate(c *gin.Context) {
+	var req struct {
+		Username string `json:"username"`
+	}
+	err := common.DecodeJson(c.Request.Body, &req)
+	if err != nil {
+		common.ApiErrorI18n(c, i18n.MsgInvalidParams)
+		return
+	}
+
+	managerId := c.GetInt("id")
+
+	// 查找目标用户
+	targetUser, err := model.GetUserByUsername(req.Username)
+	if err != nil {
+		c.JSON(http.StatusOK, gin.H{
+			"success": false,
+			"message": "用户不存在",
+		})
+		return
+	}
+
+	// 不能添加管理员
+	if targetUser.Role >= common.RoleUserManager {
+		c.JSON(http.StatusForbidden, gin.H{
+			"success": false,
+			"message": "不能添加管理员用户",
+		})
+		return
+	}
+
+	// 检查是否已经添加
+	_, err = model.GetUserManagerRelation(managerId, targetUser.Id)
+	if err == nil {
+		c.JSON(http.StatusOK, gin.H{
+			"success": false,
+			"message": "该用户已在下级列表中",
+		})
+		return
+	}
+
+	// 创建关系
+	relation := model.UserManagerRelation{
+		ManagerId: managerId,
+		UserId:    targetUser.Id,
+		CreatedAt: common.GetTimestamp(),
+	}
+	err = relation.Insert()
+	if err != nil {
+		common.ApiError(c, err)
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"success": true,
+		"message": "添加成功",
+	})
+}
+
+// GetSubordinates 获取下级用户列表
+func GetSubordinates(c *gin.Context) {
+	managerId := c.GetInt("id")
+
+	users, err := model.GetUserManagerSubordinates(managerId)
+	if err != nil {
+		common.ApiError(c, err)
+		return
+	}
+
+	// 获取每个用户的备注
+	var result []gin.H
+	for _, user := range users {
+		relation, _ := model.GetUserManagerRelation(managerId, user.Id)
+		result = append(result, gin.H{
+			"id":           user.Id,
+			"username":     user.Username,
+			"display_name": user.DisplayName,
+			"quota":        user.Quota,
+			"used_quota":   user.UsedQuota,
+			"status":       user.Status,
+			"note":         relation.Note,
+		})
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"success": true,
+		"message": "",
+		"data":    result,
+	})
+}
+
+// RechargeSubordinate 给下级充值
+func RechargeSubordinate(c *gin.Context) {
+	var req struct {
+		UserId int `json:"user_id"`
+		Amount int `json:"amount"`
+	}
+	err := common.DecodeJson(c.Request.Body, &req)
+	if err != nil {
+		common.ApiErrorI18n(c, i18n.MsgInvalidParams)
+		return
+	}
+
+	managerId := c.GetInt("id")
+
+	if req.Amount <= 0 {
+		common.ApiErrorI18n(c, i18n.MsgUserQuotaChangeZero)
+		return
+	}
+
+	// 检查是否是自己的下级
+	_, err = model.GetUserManagerRelation(managerId, req.UserId)
+	if err != nil {
+		c.JSON(http.StatusForbidden, gin.H{
+			"success": false,
+			"message": "该用户不在您的下级列表中",
+		})
+		return
+	}
+
+	// 查询管理员的额度池
+	manager := model.User{Id: managerId}
+	model.DB.Where(&manager).First(&manager)
+
+	// 检查额度池是否足够
+	if manager.QuotaPool < req.Amount {
+		c.JSON(http.StatusForbidden, gin.H{
+			"success": false,
+			"message": fmt.Sprintf("额度池不足，当前可用: %s，需要: %s",
+				logger.LogQuota(manager.QuotaPool),
+				logger.LogQuota(req.Amount)),
+		})
+		return
+	}
+
+	// 开启事务
+	tx := model.DB.Begin()
+
+	// 扣除管理员的额度池
+	if err := tx.Model(&manager).Update("quota_pool", gorm.Expr("quota_pool - ?", req.Amount)).Error; err != nil {
+		tx.Rollback()
+		common.ApiError(c, err)
+		return
+	}
+
+	// 增加目标用户额度
+	if err := model.IncreaseUserQuota(req.UserId, req.Amount, true); err != nil {
+		tx.Rollback()
+		common.ApiError(c, err)
+		return
+	}
+
+	// 创建充值记录
+	topUp := &model.TopUp{
+		UserId:       req.UserId,
+		Amount:       req.Amount,
+		Key:          fmt.Sprintf("manager_%d_%d", managerId, common.GetTimestamp()),
+		CreatedTime:  common.GetTimestamp(),
+		Status:       1,
+		RechargeType: "manager",
+	}
+	if err := tx.Create(topUp).Error; err != nil {
+		tx.Rollback()
+		common.ApiError(c, err)
+		return
+	}
+
+	tx.Commit()
+
+	c.JSON(http.StatusOK, gin.H{
+		"success": true,
+		"message": "充值成功",
+	})
+}
+
+// UpdateSubordinateNote 更新下级备注
+func UpdateSubordinateNote(c *gin.Context) {
+	var req struct {
+		UserId int    `json:"user_id"`
+		Note   string `json:"note"`
+	}
+	err := common.DecodeJson(c.Request.Body, &req)
+	if err != nil {
+		common.ApiErrorI18n(c, i18n.MsgInvalidParams)
+		return
+	}
+
+	managerId := c.GetInt("id")
+
+	// 检查是否是自己的下级
+	_, err = model.GetUserManagerRelation(managerId, req.UserId)
+	if err != nil {
+		c.JSON(http.StatusForbidden, gin.H{
+			"success": false,
+			"message": "该用户不在您的下级列表中",
+		})
+		return
+	}
+
+	// 更新备注
+	err = model.UpdateUserManagerRelationNote(managerId, req.UserId, req.Note)
+	if err != nil {
+		common.ApiError(c, err)
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"success": true,
+		"message": "更新成功",
+	})
+}

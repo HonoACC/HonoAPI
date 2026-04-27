@@ -135,6 +135,16 @@ func SetApiRouter(router *gin.Engine) {
 			adminRoute.GET("/2fa/stats", controller.Admin2FAStats)
 			adminRoute.DELETE("/:id/2fa", controller.AdminDisable2FA)
 		}
+
+		// UserManager subordinate management routes
+		managerRoute := userRoute.Group("/manager")
+		managerRoute.Use(middleware.UserManagerAuth())
+		{
+			managerRoute.POST("/subordinate/add", controller.AddSubordinate)
+			managerRoute.GET("/subordinates", controller.GetSubordinates)
+			managerRoute.POST("/subordinate/recharge", controller.RechargeSubordinate)
+			managerRoute.PUT("/subordinate/note", controller.UpdateSubordinateNote)
+		}
 	}
 
 		// Subscription billing (plans, purchase, admin management)
