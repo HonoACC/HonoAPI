@@ -993,6 +993,117 @@ func ManageUser(c *gin.Context) {
 	return
 }
 
+// ManageUserLimited 受限用户管理员只能增加额度
+func ManageUserLimited(c *gin.Context) {
+	var req ManageRequest
+	err := common.DecodeJson(c.Request.Body, &req)
+
+	if err != nil {
+		common.ApiErrorI18n(c, i18n.MsgInvalidParams)
+		return
+	}
+
+	myRole := c.GetInt("role")
+	myId := c.GetInt("id")
+
+	// 只允许 role=5 的用户管理员
+	if myRole != common.RoleUserManager {
+		common.ApiErrorI18n(c, i18n.MsgUserNoPermission)
+		return
+	}
+
+	// 只允许 add_quota 操作
+	if req.Action != "add_quota" {
+		c.JSON(http.StatusForbidden, gin.H{
+			"success": false,
+			"message": "受限管理员只能增加用户额度",
+		})
+		return
+	}
+
+	// 只允许 add 模式
+	if req.Mode != "add" {
+		c.JSON(http.StatusForbidden, gin.H{
+			"success": false,
+			"message": "受限管理员只能增加额度，不能减少或覆盖",
+		})
+		return
+	}
+
+	if req.Value <= 0 {
+		common.ApiErrorI18n(c, i18n.MsgUserQuotaChangeZero)
+		return
+	}
+
+	// 查询目标用户
+	targetUser := model.User{Id: req.Id}
+	model.DB.Where(&targetUser).First(&targetUser)
+	if targetUser.Id == 0 {
+		common.ApiErrorI18n(c, i18n.MsgUserNotExists)
+		return
+	}
+
+	// 不能给管理员增加额度
+	if targetUser.Role >= common.RoleUserManager {
+		c.JSON(http.StatusForbidden, gin.H{
+			"success": false,
+			"message": "不能给管理员用户增加额度",
+		})
+		return
+	}
+
+	// 查询当前管理员的额度池
+	manager := model.User{Id: myId}
+	model.DB.Where(&manager).First(&manager)
+
+	// 检查额度池是否足够
+	if manager.QuotaPool < req.Value {
+		c.JSON(http.StatusForbidden, gin.H{
+			"success": false,
+			"message": fmt.Sprintf("额度池不足，当前可用: %s，需要: %s",
+				logger.LogQuota(manager.QuotaPool),
+				logger.LogQuota(req.Value)),
+		})
+		return
+	}
+
+	// 开启事务
+	tx := model.DB.Begin()
+
+	// 扣除管理员的额度池
+	if err := tx.Model(&manager).Update("quota_pool", gorm.Expr("quota_pool - ?", req.Value)).Error; err != nil {
+		tx.Rollback()
+		common.ApiError(c, err)
+		return
+	}
+
+	// 增加目标用户额度
+	if err := model.IncreaseUserQuota(targetUser.Id, req.Value, true); err != nil {
+		tx.Rollback()
+		common.ApiError(c, err)
+		return
+	}
+
+	tx.Commit()
+
+	// 记录日志
+	adminName := c.GetString("username")
+	adminId := c.GetInt("id")
+	adminInfo := map[string]interface{}{
+		"admin_id":       adminId,
+		"admin_username": adminName,
+	}
+	model.RecordLogWithAdminInfo(targetUser.Id, model.LogTypeManage,
+		fmt.Sprintf("受限管理员增加用户额度 %s", logger.LogQuota(req.Value)), adminInfo)
+
+	c.JSON(http.StatusOK, gin.H{
+		"success": true,
+		"message": fmt.Sprintf("成功增加额度 %s，剩余额度池: %s",
+			logger.LogQuota(req.Value),
+			logger.LogQuota(manager.QuotaPool-req.Value)),
+	})
+}
+
 type emailBindRequest struct {
 	Email string `json:"email"`
 	Code  string `json:"code"`

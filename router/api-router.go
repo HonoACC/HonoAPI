@@ -112,9 +112,18 @@ func SetApiRouter(router *gin.Engine) {
 				// Custom OAuth bindings
 				selfRoute.GET("/oauth/bindings", controller.GetUserOAuthBindings)
 				selfRoute.DELETE("/oauth/bindings/:provider_id", controller.UnbindCustomOAuth)
-			}
+		}
 
-			adminRoute := userRoute.Group("/")
+		userManagerRoute := userRoute.Group("/")
+		userManagerRoute.Use(middleware.UserManagerAuth())
+		{
+			userManagerRoute.GET("/", controller.GetAllUsers)           // 查看用户列表
+			userManagerRoute.GET("/search", controller.SearchUsers)     // 搜索用户
+			userManagerRoute.POST("/", controller.CreateUser)           // 创建用户
+			userManagerRoute.POST("/manage", controller.ManageUserLimited) // 受限的用户管理（只能增加额度）
+		}
+
+		adminRoute := userRoute.Group("/")
 			adminRoute.Use(middleware.AdminAuth())
 			{
 				adminRoute.GET("/", controller.GetAllUsers)
