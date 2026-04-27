@@ -17,15 +17,17 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 For commercial licensing, please contact support@quantumnous.com
 */
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useContext } from 'react';
 import { useTranslation } from 'react-i18next';
 import { API, showError, showSuccess } from '../../helpers';
 import { ITEMS_PER_PAGE } from '../../constants';
 import { useTableCompactMode } from '../common/useTableCompactMode';
+import { UserContext } from '../../context/User';
 
 export const useUsersData = () => {
   const { t } = useTranslation();
   const [compactMode, setCompactMode] = useTableCompactMode('users');
+  const [userState] = useContext(UserContext);
 
   // State management
   const [users, setUsers] = useState([]);
@@ -35,6 +37,8 @@ export const useUsersData = () => {
   const [searching, setSearching] = useState(false);
   const [groupOptions, setGroupOptions] = useState([]);
   const [userCount, setUserCount] = useState(0);
+  const [currentUserRole, setCurrentUserRole] = useState(1);
+  const [quotaPool, setQuotaPool] = useState(0);
 
   // Modal states
   const [showAddUser, setShowAddUser] = useState(false);
@@ -272,7 +276,13 @@ export const useUsersData = () => {
         showError(reason);
       });
     fetchGroups().then();
-  }, []);
+    
+    // Get current user info
+    if (userState?.user) {
+      setCurrentUserRole(userState.user.role || 1);
+      setQuotaPool(userState.user.quota_pool || 0);
+    }
+  }, [userState?.user]);
 
   return {
     // Data state
@@ -283,6 +293,8 @@ export const useUsersData = () => {
     userCount,
     searching,
     groupOptions,
+    currentUserRole,
+    quotaPool,
 
     // Modal state
     showAddUser,

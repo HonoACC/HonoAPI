@@ -42,6 +42,12 @@ const renderRole = (role, t) => {
           {t('普通用户')}
         </Tag>
       );
+    case 5:
+      return (
+        <Tag color='cyan' shape='circle'>
+          {t('用户管理员')}
+        </Tag>
+      );
     case 10:
       return (
         <Tag color='yellow' shape='circle'>
@@ -209,6 +215,8 @@ const renderOperations = (
     showResetPasskeyModal,
     showResetTwoFAModal,
     showUserSubscriptionsModal,
+    showAddQuotaModal,
+    currentUserRole,
     t,
   },
 ) => {
@@ -216,6 +224,27 @@ const renderOperations = (
     return <></>;
   }
 
+  // 受限管理员（role=5）只能看到简化的操作
+  if (currentUserRole === 5) {
+    // 不能管理其他管理员（role >= 5）
+    if (record.role >= 5) {
+      return <></>;
+    }
+
+    return (
+      <Space>
+        <Button
+          type='primary'
+          size='small'
+          onClick={() => showAddQuotaModal(record)}
+        >
+          {t('增加额度')}
+        </Button>
+      </Space>
+    );
+  }
+
+  // 完整管理员权限（role >= 10）
   const moreMenu = [
     {
       node: 'item',
@@ -309,6 +338,8 @@ export const getUsersColumns = ({
   showResetPasskeyModal,
   showResetTwoFAModal,
   showUserSubscriptionsModal,
+  showAddQuotaModal,
+  currentUserRole,
 }) => {
   return [
     {
@@ -366,6 +397,8 @@ export const getUsersColumns = ({
           showResetPasskeyModal,
           showResetTwoFAModal,
           showUserSubscriptionsModal,
+          showAddQuotaModal,
+          currentUserRole,
           t,
         }),
     },
