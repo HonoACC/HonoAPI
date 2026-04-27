@@ -46,6 +46,7 @@ import ModelDeploymentPage from './pages/ModelDeployment';
 import Playground from './pages/Playground';
 import Subscription from './pages/Subscription';
 import Subordinates from './pages/Subordinates';
+import SubordinatesManager from './pages/SubordinatesManager';
 import OAuth2Callback from './components/auth/OAuth2Callback';
 import PersonalSetting from './components/settings/PersonalSetting';
 import Setup from './pages/Setup';
@@ -177,6 +178,14 @@ function App() {
           element={
             <PrivateRoute>
               <Subordinates />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path='/console/subordinates-manager'
+          element={
+            <PrivateRoute>
+              <SubordinatesManager />
             </PrivateRoute>
           }
         />

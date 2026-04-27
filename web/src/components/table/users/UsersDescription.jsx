@@ -24,18 +24,27 @@ import CompactModeToggle from '../../common/ui/CompactModeToggle';
 
 const { Text } = Typography;
 
-const UsersDescription = ({ compactMode, setCompactMode, t }) => {
+const UsersDescription = ({ compactMode, setCompactMode, t, title, quotaPool, showQuotaPool }) => {
   return (
     <div className='flex flex-col md:flex-row justify-between items-start md:items-center gap-2 w-full'>
-      <div className='flex items-center text-blue-500'>
-        <IconUserAdd className='mr-2' />
-        <Text>{t('用户管理')}</Text>
+      <div className='flex items-center gap-4'>
+        <div className='flex items-center text-blue-500'>
+          <IconUserAdd className='mr-2' />
+          <Text>{title || t('用户管理')}</Text>
+        </div>
+        {showQuotaPool && quotaPool !== undefined && (
+          <Text type='tertiary'>
+            当前可用额度池：{(quotaPool / 500000).toFixed(2)} 元
+          </Text>
+        )}
       </div>
-      <CompactModeToggle
-        compactMode={compactMode}
-        setCompactMode={setCompactMode}
-        t={t}
-      />
+      {setCompactMode && (
+        <CompactModeToggle
+          compactMode={compactMode}
+          setCompactMode={setCompactMode}
+          t={t}
+        />
+      )}
     </div>
   );
 };

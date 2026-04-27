@@ -54,6 +54,7 @@ const UsersTable = (usersData) => {
     currentUserRole,
     quotaPool,
     t,
+    isSubordinateMode,
   } = usersData;
 
   // Modal states
@@ -152,6 +153,7 @@ const UsersTable = (usersData) => {
       showUserSubscriptionsModal: showUserSubscriptionsUserModal,
       showAddQuotaModal: showAddQuotaUserModal,
       currentUserRole,
+      isSubordinateMode,
     });
   }, [
     t,
@@ -166,6 +168,7 @@ const UsersTable = (usersData) => {
     showUserSubscriptionsUserModal,
     showAddQuotaUserModal,
     currentUserRole,
+    isSubordinateMode,
   ]);
 
   // Handle compact mode by removing fixed positioning

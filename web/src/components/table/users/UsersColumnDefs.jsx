@@ -340,8 +340,9 @@ export const getUsersColumns = ({
   showUserSubscriptionsModal,
   showAddQuotaModal,
   currentUserRole,
+  isSubordinateMode,
 }) => {
-  return [
+  const columns = [
     {
       title: 'ID',
       dataIndex: 'id',
@@ -376,12 +377,20 @@ export const getUsersColumns = ({
         return <div>{renderRole(text, t)}</div>;
       },
     },
-    {
+  ];
+
+  // 只在非下级模式下显示邀请信息
+  if (!isSubordinateMode) {
+    columns.push({
       title: t('邀请信息'),
       dataIndex: 'invite',
       render: (text, record, index) => renderInviteInfo(text, record, t),
-    },
-    {
+    });
+  }
+
+  // 只在非下级模式下显示操作列
+  if (!isSubordinateMode) {
+    columns.push({
       title: '',
       dataIndex: 'operate',
       fixed: 'right',
@@ -401,6 +410,8 @@ export const getUsersColumns = ({
           currentUserRole,
           t,
         }),
-    },
-  ];
+    });
+  }
+
+  return columns;
 };
