@@ -22,6 +22,7 @@ import (
 
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
+	"gorm.io/gorm"
 )
 
 type LoginRequest struct {
@@ -1008,7 +1009,7 @@ func ManageUserLimited(c *gin.Context) {
 
 	// 只允许 role=5 的用户管理员
 	if myRole != common.RoleUserManager {
-		common.ApiErrorI18n(c, i18n.MsgUserNoPermission)
+		common.ApiErrorI18n(c, i18n.MsgUserNoPermissionSameLevel)
 		return
 	}
 
