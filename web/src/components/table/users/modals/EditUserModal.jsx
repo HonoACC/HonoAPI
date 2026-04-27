@@ -93,6 +93,8 @@ const EditUserModal = (props) => {
     quota: 0,
     quota_amount: 0,
     group: 'default',
+    role: 1,
+    quota_pool: 0,
     remark: '',
   });
 
@@ -365,6 +367,35 @@ const EditUserModal = (props) => {
                           allowAdditions
                           search
                           rules={[{ required: true, message: t('请选择分组') }]}
+                        />
+                      </Col>
+
+                      <Col span={24}>
+                        <Form.Select
+                          field='role'
+                          label={t('角色')}
+                          placeholder={t('请选择角色')}
+                          optionList={[
+                            { label: t('普通用户'), value: 1 },
+                            { label: t('用户管理员'), value: 5 },
+                            { label: t('管理员'), value: 10 },
+                            { label: t('超级管理员'), value: 100 },
+                          ]}
+                          rules={[{ required: true, message: t('请选择角色') }]}
+                        />
+                      </Col>
+
+                      <Col span={24}>
+                        <Form.InputNumber
+                          field='quota_pool'
+                          label={t('额度池')}
+                          placeholder={t('用户管理员的额度池余额')}
+                          prefix={getCurrencyConfig().symbol}
+                          precision={6}
+                          step={1}
+                          min={0}
+                          style={{ width: '100%' }}
+                          extraText={t('仅用户管理员角色需要设置')}
                         />
                       </Col>
 

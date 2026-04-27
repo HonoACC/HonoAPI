@@ -524,6 +524,8 @@ func (user *User) Edit(updatePassword bool) error {
 		"username":     newUser.Username,
 		"display_name": newUser.DisplayName,
 		"group":        newUser.Group,
+		"role":         newUser.Role,
+		"quota_pool":   newUser.QuotaPool,
 		"remark":       newUser.Remark,
 	}
 	if updatePassword {
