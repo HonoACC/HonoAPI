@@ -254,6 +254,10 @@ func migrateDB() error {
 	if err := migrateTokenModelLimitsToText(); err != nil {
 		return err
 	}
+	// Ensure quota_pool column exists for limited user managers
+	if err := migrateUserQuotaPool(); err != nil {
+		return err
+	}
 
 	err := DB.AutoMigrate(
 		&Channel{},
@@ -700,5 +704,39 @@ func PingDB() error {
 
 	lastPingTime = time.Now()
 	common.SysLog("Database pinged successfully")
+	return nil
+}
+
+// migrateUserQuotaPool ensures quota_pool column exists in users table
+// This is safe to run multiple times - it checks if the column exists first
+func migrateUserQuotaPool() error {
+	tableName := "users"
+	columnName := "quota_pool"
+
+	if !DB.Migrator().HasTable(tableName) {
+		return nil
+	}
+
+	if DB.Migrator().HasColumn(&User{}, columnName) {
+		return nil
+	}
+
+	var alterSQL string
+	if common.UsingPostgreSQL {
+		alterSQL = fmt.Sprintf(`ALTER TABLE %s ADD COLUMN %s bigint DEFAULT 0`, tableName, columnName)
+	} else if common.UsingMySQL {
+		alterSQL = fmt.Sprintf("ALTER TABLE %s ADD COLUMN %s int DEFAULT 0", tableName, columnName)
+	} else if common.UsingSQLite {
+		alterSQL = fmt.Sprintf("ALTER TABLE %s ADD COLUMN %s integer DEFAULT 0", tableName, columnName)
+	} else {
+		return nil
+	}
+
+	if alterSQL != "" {
+		if err := DB.Exec(alterSQL).Error; err != nil {
+			return fmt.Errorf("failed to add %s.%s column: %w", tableName, columnName, err)
+		}
+		common.SysLog(fmt.Sprintf("Successfully added %s.%s column", tableName, columnName))
+	}
 	return nil
 }
