@@ -46,16 +46,29 @@ export function isRoot() {
   return user.role >= 100;
 }
 
+export function isDistributorRole() {
+  let user = localStorage.getItem('user');
+  if (!user) return false;
+  user = JSON.parse(user);
+  return user.role === 7 || user.role === 8 || user.role >= 100;
+}
+
+export function isSeniorDistributorRole() {
+  let user = localStorage.getItem('user');
+  if (!user) return false;
+  user = JSON.parse(user);
+  return user.role === 8 || user.role >= 100;
+}
+
+export const SITE_DISPLAY_NAME = 'Hono API';
+export const SITE_DISPLAY_LOGO = '/honoapi.svg';
+
 export function getSystemName() {
-  let system_name = localStorage.getItem('system_name');
-  if (!system_name) return 'New API';
-  return system_name;
+  return SITE_DISPLAY_NAME;
 }
 
 export function getLogo() {
-  let logo = localStorage.getItem('logo');
-  if (!logo) return '/logo.png';
-  return logo;
+  return SITE_DISPLAY_LOGO;
 }
 
 export function getUserIdFromLocalStorage() {

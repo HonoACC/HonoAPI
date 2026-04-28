@@ -191,6 +191,20 @@ func SetApiRouter(router *gin.Engine) {
 			customOAuthRoute.PUT("/:id", controller.UpdateCustomOAuthProvider)
 			customOAuthRoute.DELETE("/:id", controller.DeleteCustomOAuthProvider)
 		}
+		distributorRoute := apiRouter.Group("/distributor")
+		distributorRoute.Use(middleware.RootOrDistributorAuth())
+		{
+			distributorRoute.GET("/summary", controller.GetDistributorSummary)
+			distributorRoute.GET("/children", controller.GetDistributorChildren)
+			distributorRoute.GET("/search-bindable-users", controller.SearchDistributorBindableUsers)
+			distributorRoute.GET("/search-role-candidates", controller.SearchDistributorRoleCandidates)
+			distributorRoute.POST("/bind", controller.BindDistributorChild)
+			distributorRoute.POST("/grant-quota", controller.GrantDistributorQuota)
+			distributorRoute.POST("/set-role", controller.SetDistributorRole)
+			distributorRoute.PUT("/relation/:child_user_id/remark", controller.UpdateDistributorRemark)
+			distributorRoute.GET("/quota-logs", controller.GetDistributorQuotaLogs)
+			distributorRoute.GET("/operation-logs", controller.GetDistributorOperationLogs)
+		}
 		performanceRoute := apiRouter.Group("/performance")
 		performanceRoute.Use(middleware.RootAuth())
 		{

@@ -185,6 +185,24 @@ func RootAuth() func(c *gin.Context) {
 	}
 }
 
+func RootOrDistributorAuth() func(c *gin.Context) {
+	return func(c *gin.Context) {
+		authHelper(c, common.RoleCommonUser)
+		if c.IsAborted() {
+			return
+		}
+		role := c.GetInt("role")
+		if !common.CanAccessDistributorConsole(role) {
+			c.JSON(http.StatusOK, gin.H{
+				"success": false,
+				"message": common.TranslateMessage(c, i18n.MsgAuthInsufficientPrivilege),
+			})
+			c.Abort()
+			return
+		}
+	}
+}
+
 func WssAuth(c *gin.Context) {
 
 }
