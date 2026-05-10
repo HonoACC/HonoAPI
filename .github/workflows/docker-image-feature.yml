@@ -7,6 +7,10 @@ on:
         description: 'Feature branch name'
         required: true
         default: 'feature/limited-user-manager'
+      image_tag:
+        description: 'Optional custom image tag, e.g. distributor-v1 or ghcr.io/honoacc/honoapi:distributor-v1'
+        required: false
+        default: ''
 
 jobs:
   build:
@@ -29,6 +33,10 @@ jobs:
         run: |
           BRANCH_NAME="${{ github.event.inputs.branch }}"
           TAG_NAME=$(echo "$BRANCH_NAME" | sed 's/\//-/g')
+          CUSTOM_TAG="${{ github.event.inputs.image_tag }}"
+          if [ -n "$CUSTOM_TAG" ]; then
+            TAG_NAME=$(echo "$CUSTOM_TAG" | sed 's#^ghcr.io/honoacc/honoapi:##')
+          fi
           VERSION="${TAG_NAME}-$(date +'%Y%m%d')-$(git rev-parse --short HEAD)"
           echo "$VERSION" > VERSION
           echo "tag=$TAG_NAME" >> $GITHUB_OUTPUT
