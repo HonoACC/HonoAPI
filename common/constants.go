@@ -162,14 +162,32 @@ const (
 )
 
 const (
-	RoleGuestUser  = 0
-	RoleCommonUser = 1
-	RoleAdminUser  = 10
-	RoleRootUser   = 100
+	RoleGuestUser             = 0
+	RoleCommonUser            = 1
+	RoleDistributorUser       = 7
+	RoleSeniorDistributorUser = 8
+	RoleAdminUser             = 10
+	RoleRootUser              = 100
 )
 
 func IsValidateRole(role int) bool {
-	return role == RoleGuestUser || role == RoleCommonUser || role == RoleAdminUser || role == RoleRootUser
+	return role == RoleGuestUser || role == RoleCommonUser || role == RoleDistributorUser || role == RoleSeniorDistributorUser || role == RoleAdminUser || role == RoleRootUser
+}
+
+func IsDistributorRole(role int) bool {
+	return role == RoleDistributorUser || role == RoleSeniorDistributorUser
+}
+
+func IsSeniorDistributorRole(role int) bool {
+	return role == RoleSeniorDistributorUser
+}
+
+func IsRootRole(role int) bool {
+	return role == RoleRootUser
+}
+
+func CanAccessDistributorConsole(role int) bool {
+	return IsDistributorRole(role) || IsRootRole(role)
 }
 
 var (

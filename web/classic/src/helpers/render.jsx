@@ -75,6 +75,7 @@ import {
   Layers,
   Gift,
   User,
+  Users,
   Settings,
   CircleUser,
   Package,
@@ -129,6 +130,8 @@ export function getLucideIcon(key, selected = false) {
       return <MessageSquare {...commonProps} color={iconColor} />;
     case 'token':
       return <Key {...commonProps} color={iconColor} />;
+    case 'distributor':
+      return <Users {...commonProps} color={iconColor} />;
     case 'log':
       return <BarChart3 {...commonProps} color={iconColor} />;
     case 'midjourney':

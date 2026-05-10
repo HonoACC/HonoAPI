@@ -28,6 +28,8 @@ const FooterBar = () => {
   const [footer, setFooter] = useState(getFooterHTML());
   const systemName = getSystemName();
   const logo = getLogo();
+  const attributionPrefix = t('基于');
+  const attributionSuffix = t('开发');
   const [statusState] = useContext(StatusContext);
   const isDemoSiteMode = statusState?.status?.demo_site_enabled || false;
 
@@ -52,7 +54,7 @@ const FooterBar = () => {
               <img
                 src={logo}
                 alt={systemName}
-                className='w-16 h-16 rounded-full bg-gray-800 p-1.5 object-contain'
+                className='hono-site-logo w-16 h-16 rounded-full bg-gray-800 p-1.5 object-contain'
               />
             </div>
 
@@ -196,9 +198,7 @@ const FooterBar = () => {
           </div>
 
           <div className='text-sm'>
-            <span className='!text-semi-color-text-1'>
-              {t('设计与开发由')}{' '}
-            </span>
+            <span className='!text-semi-color-text-1'>{attributionPrefix} </span>
             <a
               href='https://github.com/QuantumNous/new-api'
               target='_blank'
@@ -207,11 +207,12 @@ const FooterBar = () => {
             >
               New API
             </a>
+            <span className='!text-semi-color-text-1'> {attributionSuffix}</span>
           </div>
         </div>
       </footer>
     ),
-    [logo, systemName, t, currentYear, isDemoSiteMode],
+    [logo, systemName, t, currentYear, isDemoSiteMode, attributionPrefix, attributionSuffix],
   );
 
   useEffect(() => {
@@ -228,9 +229,7 @@ const FooterBar = () => {
               dangerouslySetInnerHTML={{ __html: footer }}
             ></div>
             <div className='text-sm flex-shrink-0'>
-              <span className='!text-semi-color-text-1'>
-                {t('设计与开发由')}{' '}
-              </span>
+              <span className='!text-semi-color-text-1'>{attributionPrefix} </span>
               <a
                 href='https://github.com/QuantumNous/new-api'
                 target='_blank'
@@ -239,6 +238,7 @@ const FooterBar = () => {
               >
                 New API
               </a>
+              <span className='!text-semi-color-text-1'> {attributionSuffix}</span>
             </div>
           </div>
         </footer>
