@@ -1,0 +1,9 @@
+{
+  "name": "honoapi-web",
+  "private": true,
+  "scripts": {
+    "dev": "cd classic && bun run dev --host 0.0.0.0",
+    "dev:default": "cd default && bun run dev",
+    "dev:optimus": "cd optimus && pnpm run dev"
+  }
+}
