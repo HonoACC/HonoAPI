@@ -213,7 +213,14 @@ const NoticeModal = ({
       title={
         <div className='flex items-center justify-between w-full'>
           <span>{t('系统公告')}</span>
-          <Tabs activeKey={activeTab} onChange={setActiveTab} type='button'>
+          <Tabs activeKey={activeTab} onChange={setActiveTab} type='button' style={{
+            '--semi-color-primary': 'var(--semi-color-text-0)',
+            '--semi-color-primary-hover': 'var(--semi-color-text-1)',
+            '--semi-color-primary-active': 'var(--semi-color-text-0)',
+            '--semi-color-primary-light-default': 'var(--semi-color-fill-0)',
+            '--semi-color-primary-light-hover': 'var(--semi-color-fill-1)',
+            '--semi-color-primary-light-active': 'var(--semi-color-fill-2)',
+          }}>
             <TabPane
               tab={
                 <span className='flex items-center gap-1'>
@@ -237,10 +244,18 @@ const NoticeModal = ({
       onCancel={onClose}
       footer={
         <div className='flex justify-end'>
-          <Button type='secondary' onClick={handleCloseTodayNotice}>
+          <Button type='tertiary' onClick={handleCloseTodayNotice}>
             {t('今日关闭')}
           </Button>
-          <Button type='primary' onClick={onClose}>
+          <Button
+            type='primary'
+            onClick={onClose}
+            style={{
+              backgroundColor: 'var(--semi-color-text-0)',
+              borderColor: 'var(--semi-color-text-0)',
+              color: 'var(--semi-color-bg-0)',
+            }}
+          >
             {t('关闭公告')}
           </Button>
         </div>
