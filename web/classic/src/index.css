@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+
 /* ==================== Tailwind CSS 配置 ==================== */
 @layer tailwind-base, semi, tailwind-components, tailwind-utils;
 
@@ -1028,3 +1030,121 @@ html.dark .with-pastel-balls::before {
 }
 
 .ec-dbcd0a3c01b55203 { forced-color-adjust: auto; }
+
+/* ==================== Optimus Landing Page Styles ==================== */
+
+/* Landing page font utilities */
+.font-display {
+  font-family: 'Instrument Sans', system-ui, sans-serif;
+}
+
+.font-mono-landing {
+  font-family: 'JetBrains Mono', monospace;
+}
+
+.font-sans-landing {
+  font-family: 'Instrument Sans', system-ui, sans-serif;
+}
+
+/* Text stroke effect */
+.text-stroke {
+  -webkit-text-stroke: 1.5px currentColor;
+  -webkit-text-fill-color: transparent;
+}
+
+/* Marquee animation */
+.marquee {
+  animation: marquee 30s linear infinite;
+}
+
+.marquee-reverse {
+  animation: marquee-reverse 25s linear infinite;
+}
+
+@keyframes marquee {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
+@keyframes marquee-reverse {
+  0% { transform: translateX(-50%); }
+  100% { transform: translateX(0); }
+}
+
+/* Character-in animation (blur + slide up) */
+.animate-char-in {
+  animation: char-in 0.5s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  opacity: 0;
+  filter: blur(40px);
+  transform: translateY(100%);
+}
+
+@keyframes char-in {
+  0% {
+    opacity: 0;
+    filter: blur(40px);
+    transform: translateY(100%);
+  }
+  100% {
+    opacity: 1;
+    filter: blur(0);
+    transform: translateY(0);
+  }
+}
+
+/* Line reveal animation */
+.line-reveal {
+  clip-path: inset(0 100% 0 0);
+  animation: line-reveal 0.8s cubic-bezier(0.77, 0, 0.175, 1) forwards;
+}
+
+@keyframes line-reveal {
+  to { clip-path: inset(0 0 0 0); }
+}
+
+/* Hover lift effect */
+.hover-lift {
+  transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.hover-lift:hover {
+  transform: translateY(-4px);
+}
+
+/* Noise overlay texture */
+.noise-overlay {
+  position: relative;
+}
+
+.noise-overlay::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+  opacity: 0.03;
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* Landing page color variables (works with Semi dark mode) */
+.landing-page {
+  --landing-foreground: var(--semi-color-text-0);
+  --landing-muted-foreground: var(--semi-color-text-2);
+  --landing-background: var(--semi-color-bg-0);
+  --landing-border: var(--semi-color-border);
+}
+
+/* Logo dark mode auto-invert */
+body[theme-mode='dark'] .logo-auto-invert {
+  filter: invert(1);
+}
+
+/* Landing page specific overrides - allow body scroll */
+.landing-page-body {
+  overflow-y: auto !important;
+}
+
+.landing-page-body .app-layout {
+  height: auto !important;
+  overflow: visible !important;
+}
