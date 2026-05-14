@@ -17,7 +17,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 For commercial licensing, please contact support@quantumnous.com
 */
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useHeaderBar } from '../../../hooks/common/useHeaderBar';
 import { useNotifications } from '../../../hooks/common/useNotifications';
 import { useNavigation } from '../../../hooks/common/useNavigation';
@@ -64,8 +64,29 @@ const HeaderBar = ({ onMobileMenuToggle, drawerOpen }) => {
 
   const { mainNavLinks } = useNavigation(t, docsLink, headerNavModules);
 
+  const [isScrolled, setIsScrolled] = useState(false);
+
+  useEffect(() => {
+    // 控制台路由下，body 不可滚动，强制保持非滚动态
+    if (isConsoleRoute) {
+      setIsScrolled(false);
+      return;
+    }
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 20);
+    };
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, [isConsoleRoute]);
+
   return (
-    <header className='text-semi-color-text-0 sticky top-0 z-50 transition-colors duration-300 bg-white/75 dark:bg-zinc-900/75 backdrop-blur-lg'>
+    <header
+      className={`fixed z-[100] transition-all duration-500 ${
+        isScrolled
+          ? 'top-4 left-4 right-4'
+          : 'top-0 left-0 right-0'
+      }`}
+    >
       <NoticeModal
         visible={noticeVisible}
         onClose={handleNoticeClose}
@@ -74,8 +95,19 @@ const HeaderBar = ({ onMobileMenuToggle, drawerOpen }) => {
         unreadKeys={getUnreadKeys()}
       />
 
-      <div className='w-full px-2'>
-        <div className='flex items-center justify-between h-16'>
+      <nav
+        className={`mx-auto transition-all duration-500 ${
+          isScrolled
+            ? 'bg-white/80 dark:bg-zinc-900/80 backdrop-blur-xl rounded-2xl max-w-[1200px]'
+            : 'bg-transparent max-w-[1400px]'
+        }`}
+        style={isScrolled ? { boxShadow: '0 0 0 1px rgba(0,0,0,0.06), 0 2px 8px rgba(0,0,0,0.04)' } : undefined}
+      >
+        <div
+          className={`flex items-center justify-between transition-all duration-500 px-4 lg:px-6 ${
+            isScrolled ? 'h-14' : 'h-16'
+          }`}
+        >
           <div className='flex items-center'>
             <MobileMenuButton
               isConsoleRoute={isConsoleRoute}
@@ -124,7 +156,7 @@ const HeaderBar = ({ onMobileMenuToggle, drawerOpen }) => {
             t={t}
           />
         </div>
-      </div>
+      </nav>
     </header>
   );
 };

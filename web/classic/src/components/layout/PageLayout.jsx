@@ -39,7 +39,7 @@ import { UserContext } from '../../context/User';
 import { StatusContext } from '../../context/Status';
 import { useLocation } from 'react-router-dom';
 import { normalizeLanguage } from '../../i18n/language';
-const { Sider, Content, Header } = Layout;
+const { Sider, Content } = Layout;
 
 const PageLayout = () => {
   const [userState, userDispatch] = useContext(UserContext);
@@ -150,28 +150,16 @@ const PageLayout = () => {
       style={{
         display: 'flex',
         flexDirection: 'column',
-        overflow: isMobile ? 'visible' : 'hidden',
+        overflow: isMobile || !isConsoleRoute ? 'visible' : 'hidden',
       }}
     >
-      <Header
-        style={{
-          padding: 0,
-          height: 'auto',
-          lineHeight: 'normal',
-          position: 'fixed',
-          width: '100%',
-          top: 0,
-          zIndex: 100,
-        }}
-      >
-        <HeaderBar
-          onMobileMenuToggle={() => setDrawerOpen((prev) => !prev)}
-          drawerOpen={drawerOpen}
-        />
-      </Header>
+      <HeaderBar
+        onMobileMenuToggle={() => setDrawerOpen((prev) => !prev)}
+        drawerOpen={drawerOpen}
+      />
       <Layout
         style={{
-          overflow: isMobile ? 'visible' : 'auto',
+          overflow: isMobile || !isConsoleRoute ? 'visible' : 'auto',
           display: 'flex',
           flexDirection: 'column',
         }}
@@ -211,7 +199,7 @@ const PageLayout = () => {
           <Content
             style={{
               flex: '1 0 auto',
-              overflowY: isMobile ? 'visible' : 'hidden',
+              overflowY: isMobile || !isConsoleRoute ? 'visible' : 'hidden',
               WebkitOverflowScrolling: 'touch',
               padding: shouldInnerPadding ? (isMobile ? '5px' : '24px') : '0',
               position: 'relative',

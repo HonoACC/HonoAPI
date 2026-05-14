@@ -156,6 +156,12 @@ const RegisterForm = () => {
   }, [status]);
 
   useEffect(() => {
+    document.body.classList.add('landing-page-body');
+    window.scrollTo(0, 0);
+    return () => document.body.classList.remove('landing-page-body');
+  }, []);
+
+  useEffect(() => {
     let countdownInterval = null;
     if (disableButton && countdown > 0) {
       countdownInterval = setInterval(() => {
@@ -396,15 +402,12 @@ const RegisterForm = () => {
       <div className='flex flex-col items-center'>
         <div className='w-full max-w-md'>
           <div className='flex items-center justify-center mb-6 gap-2'>
-            <img src={logo} alt='Logo' className='h-10 rounded-full' />
-            <Title heading={3} className='!text-gray-800'>
-              {systemName}
-            </Title>
+            <img src={logo} alt='Logo' className='h-10 rounded-full logo-auto-invert' />
           </div>
 
           <Card className='border-0 !rounded-2xl overflow-hidden'>
             <div className='flex justify-center pt-6 pb-2'>
-              <Title heading={3} className='text-gray-800 dark:text-gray-200'>
+              <Title heading={3} className='text-semi-color-text-0'>
                 {t('注 册')}
               </Title>
             </div>
@@ -526,8 +529,8 @@ const RegisterForm = () => {
 
                 <Button
                   theme='solid'
-                  type='primary'
-                  className='w-full h-12 flex items-center justify-center bg-black text-white !rounded-full hover:bg-gray-800 transition-colors'
+                  type='tertiary'
+                  className='w-full h-12 flex items-center justify-center !bg-semi-color-text-0 !text-semi-color-bg-0 !rounded-full hover:opacity-90 transition-colors'
                   icon={<IconMail size='large' />}
                   onClick={handleEmailRegisterClick}
                   loading={emailRegisterLoading}
@@ -541,7 +544,7 @@ const RegisterForm = () => {
                   {t('已有账户？')}{' '}
                   <Link
                     to='/login'
-                    className='text-blue-600 hover:text-blue-800 font-medium'
+                    className='!text-semi-color-text-0 hover:!text-semi-color-text-1 font-medium'
                   >
                     {t('登录')}
                   </Link>
@@ -559,15 +562,12 @@ const RegisterForm = () => {
       <div className='flex flex-col items-center'>
         <div className='w-full max-w-md'>
           <div className='flex items-center justify-center mb-6 gap-2'>
-            <img src={logo} alt='Logo' className='h-10 rounded-full' />
-            <Title heading={3} className='!text-gray-800'>
-              {systemName}
-            </Title>
+            <img src={logo} alt='Logo' className='h-10 rounded-full logo-auto-invert' />
           </div>
 
           <Card className='border-0 !rounded-2xl overflow-hidden'>
             <div className='flex justify-center pt-6 pb-2'>
-              <Title heading={3} className='text-gray-800 dark:text-gray-200'>
+              <Title heading={3} className='text-semi-color-text-0'>
                 {t('注 册')}
               </Title>
             </div>
@@ -643,7 +643,7 @@ const RegisterForm = () => {
                       checked={agreedToTerms}
                       onChange={(e) => setAgreedToTerms(e.target.checked)}
                     >
-                      <Text size='small' className='text-gray-600'>
+                      <Text size='small' className='text-semi-color-text-2'>
                         {t('我已阅读并同意')}
                         {hasUserAgreement && (
                           <>
@@ -651,7 +651,7 @@ const RegisterForm = () => {
                               href='/user-agreement'
                               target='_blank'
                               rel='noopener noreferrer'
-                              className='text-blue-600 hover:text-blue-800 mx-1'
+                              className='text-semi-color-text-0 hover:text-semi-color-text-1 mx-1'
                             >
                               {t('用户协议')}
                             </a>
@@ -664,7 +664,7 @@ const RegisterForm = () => {
                               href='/privacy-policy'
                               target='_blank'
                               rel='noopener noreferrer'
-                              className='text-blue-600 hover:text-blue-800 mx-1'
+                              className='text-semi-color-text-0 hover:text-semi-color-text-1 mx-1'
                             >
                               {t('隐私政策')}
                             </a>
@@ -678,8 +678,8 @@ const RegisterForm = () => {
                 <div className='space-y-2 pt-2'>
                   <Button
                     theme='solid'
-                    className='w-full !rounded-full'
-                    type='primary'
+                    className='w-full !rounded-full !bg-semi-color-text-0 !text-semi-color-bg-0 hover:opacity-90'
+                    type='tertiary'
                     htmlType='submit'
                     onClick={handleSubmit}
                     loading={registerLoading}
@@ -717,7 +717,7 @@ const RegisterForm = () => {
                   {t('已有账户？')}{' '}
                   <Link
                     to='/login'
-                    className='text-blue-600 hover:text-blue-800 font-medium'
+                    className='!text-semi-color-text-0 hover:!text-semi-color-text-1 font-medium'
                   >
                     {t('登录')}
                   </Link>
@@ -770,17 +770,34 @@ const RegisterForm = () => {
   };
 
   return (
-    <div className='relative overflow-hidden bg-gray-100 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8'>
-      {/* 背景模糊晕染球 */}
-      <div
-        className='blur-ball blur-ball-indigo'
-        style={{ top: '-80px', right: '-80px', transform: 'none' }}
-      />
-      <div
-        className='blur-ball blur-ball-teal'
-        style={{ top: '50%', left: '-120px' }}
-      />
-      <div className='w-full max-w-sm mt-[60px]'>
+    <div className='relative overflow-hidden min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8'>
+      {/* Grid background like hero */}
+      <div className='absolute inset-0 overflow-hidden pointer-events-none opacity-30'>
+        {[...Array(11)].map((_, i) => (
+          <div
+            key={`v-${i}`}
+            className='absolute w-px bg-semi-color-text-0 opacity-10'
+            style={{
+              left: `${8.33 * (i + 1)}%`,
+              top: 0,
+              bottom: 0,
+            }}
+          />
+        ))}
+        {[...Array(8)].map((_, i) => (
+          <div
+            key={`h-${i}`}
+            className='absolute h-px bg-semi-color-text-0 opacity-10'
+            style={{
+              top: `${12.5 * (i + 1)}%`,
+              left: 0,
+              right: 0,
+            }}
+          />
+        ))}
+      </div>
+
+      <div className='w-full max-w-sm relative z-10'>
         {showEmailRegister ||
         !hasOAuthRegisterOptions
           ? renderEmailRegisterForm()

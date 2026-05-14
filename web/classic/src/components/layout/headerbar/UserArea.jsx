@@ -148,14 +148,14 @@ const UserArea = ({
       'flex items-center justify-center !py-[10px] !px-1.5';
 
     const loginButtonSpecificStyling =
-      '!bg-semi-color-fill-0 dark:!bg-semi-color-fill-1 hover:!bg-semi-color-fill-1 dark:hover:!bg-gray-700 transition-colors';
+      '!bg-semi-color-fill-0 hover:!bg-semi-color-fill-1 transition-colors';
     let loginButtonClasses = `${commonSizingAndLayoutClass} ${loginButtonSpecificStyling}`;
 
-    let registerButtonClasses = `${commonSizingAndLayoutClass}`;
+    let registerButtonClasses = `${commonSizingAndLayoutClass} !bg-semi-color-text-0 hover:opacity-90`;
 
     const loginButtonTextSpanClass =
-      '!text-xs !text-semi-color-text-1 dark:!text-gray-300 !p-1.5';
-    const registerButtonTextSpanClass = '!text-xs !text-white !p-1.5';
+      '!text-xs !text-semi-color-text-1 !p-1.5';
+    const registerButtonTextSpanClass = '!text-xs !text-semi-color-bg-0 !p-1.5';
 
     if (showRegisterButton) {
       if (isMobile) {
@@ -184,7 +184,7 @@ const UserArea = ({
             <Link to='/register' className='flex -ml-px'>
               <Button
                 theme='solid'
-                type='primary'
+                type='tertiary'
                 className={registerButtonClasses}
               >
                 <span className={registerButtonTextSpanClass}>{t('注册')}</span>
