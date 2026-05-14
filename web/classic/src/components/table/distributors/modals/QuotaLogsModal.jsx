@@ -83,7 +83,7 @@ const remarkText = (record) => {
   return record.remark || '-';
 };
 
-const QuotaLogsModal = ({ visible, onCancel, t, logs }) => {
+const QuotaLogsModal = ({ visible, onCancel, t, logs, loading, currentPage, pageSize, total, onPageChange, onPageSizeChange }) => {
   const columns = [
     { title: t('时间'), dataIndex: 'created_at', render: (v) => new Date(v * 1000).toLocaleString() },
     {
@@ -101,7 +101,24 @@ const QuotaLogsModal = ({ visible, onCancel, t, logs }) => {
 
   return (
     <Modal title={t('操作记录')} visible={visible} onCancel={onCancel} footer={null} width={1100}>
-      <Table columns={columns} dataSource={logs} pagination={false} rowKey='key' scroll={{ x: 'max-content' }} />
+      <Table
+        columns={columns}
+        dataSource={logs}
+        loading={loading}
+        rowKey='key'
+        scroll={{ x: 'max-content' }}
+        pagination={total > 0 ? {
+          currentPage,
+          pageSize,
+          total,
+          onPageChange,
+          onPageSizeChange,
+          pageSizeOpts: [10, 20, 50],
+          showSizeChanger: true,
+          showTotal: true,
+          formatPageText: (page) => `${t('第')} ${page.currentStart}-${page.currentEnd} ${t('条，共')} ${total} ${t('条')}`,
+        } : false}
+      />
     </Modal>
   );
 };

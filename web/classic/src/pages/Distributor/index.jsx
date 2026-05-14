@@ -64,6 +64,12 @@ const Distributor = () => {
         onCancel={() => data.setLogsVisible(false)}
         t={data.t}
         logs={data.logs}
+        loading={data.logsLoading}
+        currentPage={data.logsPage}
+        pageSize={data.logsPageSize}
+        total={data.logsTotal}
+        onPageChange={data.handleLogsPageChange}
+        onPageSizeChange={data.handleLogsPageSizeChange}
       />
       <CardPro
         type='type1'

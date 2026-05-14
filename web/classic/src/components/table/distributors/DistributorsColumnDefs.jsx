@@ -18,9 +18,17 @@ For commercial licensing, please contact support@quantumnous.com
 */
 
 import React from 'react';
-import { Tag, Button, Space, Modal, Tooltip } from '@douyinfe/semi-ui';
+import { Tag, Button, Space, Modal, Tooltip, Popover, Progress, Typography, Dropdown } from '@douyinfe/semi-ui';
+import { IconMore } from '@douyinfe/semi-icons';
 import { renderQuota } from '../../../helpers/render';
 import { isRoot, isSeniorDistributorRole } from '../../../helpers';
+
+const roleTag = (role, t) => {
+  if (role === 8) return <Tag color='cyan' shape='circle'>{t('高级分销商')}</Tag>;
+  if (role === 7) return <Tag color='green' shape='circle'>{t('分销商')}</Tag>;
+  if (role === 1) return <Tag color='blue' shape='circle'>{t('普通用户')}</Tag>;
+  return <Tag color='grey' shape='circle'>{role}</Tag>;
+};
 
 const roleText = (role, t) => {
   if (role === 8) return t('高级分销商');
@@ -30,8 +38,8 @@ const roleText = (role, t) => {
 };
 
 const statusTag = (status, t) => {
-  if (status === 1) return <Tag color='green'>{t('正常')}</Tag>;
-  return <Tag color='red'>{t('禁用')}</Tag>;
+  if (status === 1) return <Tag color='green' shape='circle'>{t('正常')}</Tag>;
+  return <Tag color='red' shape='circle'>{t('禁用')}</Tag>;
 };
 
 const canSetSenior = () => isRoot();
@@ -48,11 +56,15 @@ const confirmSetRole = ({ t, record, role, setDistributorRole }) => {
   });
 };
 
-const relationText = (record, t) => {
+const relationTag = (record, t) => {
   const parentText = record.parent_user_id === 0
     ? t('超级管理员')
     : (record.parent_username || '-');
-  return <span>{parentText}</span>;
+  return (
+    <Tag color='white' shape='circle' className='!text-xs'>
+      {parentText}
+    </Tag>
+  );
 };
 
 export const createDistributorColumns = ({ t, openGrant, openRemark, openLogs, setDistributorRole }) => {
@@ -64,41 +76,108 @@ export const createDistributorColumns = ({ t, openGrant, openRemark, openLogs, s
     render: (username) => <span className='font-medium'>{username}</span>,
   },
   {
-    title: t('上级'),
-    key: 'relation',
-    render: (_, record) => relationText(record, t),
-  },
-  {
     title: t('角色'),
     dataIndex: 'role',
     key: 'role',
-    render: (role) => <Tag>{roleText(role, t)}</Tag>,
+    render: (role) => roleTag(role, t),
+  },
+  {
+    title: (
+      <Tooltip content={t('已分配金额：给下级分销商分配的可分发额度，可用与下级分发系统额度或可分发金额。')}>
+        <span>{t('剩余/已分配金额')}</span>
+      </Tooltip>
+    ),
+    dataIndex: 'allocated_amount',
+    key: 'allocated_amount',
+    render: (_, record) => {
+      if (!isDistributor(record.role)) return '-';
+      const { Paragraph } = Typography;
+      const remain = parseInt(record.distributable_quota) || 0;
+      const total = parseInt(record.allocated_amount) || 0;
+      const percent = total > 0 ? (remain / total) * 100 : 0;
+      const popoverContent = (
+        <div className='text-xs p-2'>
+          <Paragraph copyable={{ content: renderQuota(remain) }}>
+            {t('剩余')}: {renderQuota(remain)}
+          </Paragraph>
+          <Paragraph copyable={{ content: renderQuota(total) }}>
+            {t('已分配')}: {renderQuota(total)}
+          </Paragraph>
+        </div>
+      );
+      return (
+        <Popover content={popoverContent} position='top'>
+          <Tag color='white' shape='circle'>
+            <div className='flex flex-col items-end'>
+              <span className='text-xs leading-none'>{`${renderQuota(remain)} / ${renderQuota(total)}`}</span>
+              <Progress
+                percent={percent}
+                aria-label='allocated amount usage'
+                format={() => `${percent.toFixed(0)}%`}
+                style={{ width: '100%', marginTop: '1px', marginBottom: 0 }}
+              />
+            </div>
+          </Tag>
+        </Popover>
+      );
+    },
+  },
+  {
+    title: (
+      <Tooltip content={t('已分配额度：给普通用户分配的系统额度，可用于大模型调用。')}>
+        <span>{t('剩余/总额度')}</span>
+      </Tooltip>
+    ),
+    dataIndex: 'allocated_quota',
+    key: 'allocated_quota',
+    render: (_, record) => {
+      const remain = parseInt(record.quota) || 0;
+      const used = parseInt(record.used_quota) || 0;
+      const total = used + remain;
+      const allocated = parseInt(record.allocated_quota) || 0;
+      if (total === 0 && allocated === 0) return '-';
+      const { Paragraph } = Typography;
+      const percent = total > 0 ? (remain / total) * 100 : 0;
+      const popoverContent = (
+        <div className='text-xs p-2'>
+          <Paragraph copyable={{ content: renderQuota(remain) }}>
+            {t('剩余')}: {renderQuota(remain)}
+          </Paragraph>
+          <Paragraph copyable={{ content: renderQuota(allocated) }}>
+            {t('已分配')}: {renderQuota(allocated)}
+          </Paragraph>
+          <Paragraph copyable={{ content: renderQuota(total) }}>
+            {t('总额度')}: {renderQuota(total)}
+          </Paragraph>
+        </div>
+      );
+      return (
+        <Popover content={popoverContent} position='top'>
+          <Tag color='white' shape='circle'>
+            <div className='flex flex-col items-end'>
+              <span className='text-xs leading-none'>{`${renderQuota(remain)} / ${renderQuota(total)}`}</span>
+              <Progress
+                percent={percent}
+                aria-label='quota usage'
+                format={() => `${percent.toFixed(0)}%`}
+                style={{ width: '100%', marginTop: '1px', marginBottom: 0 }}
+              />
+            </div>
+          </Tag>
+        </Popover>
+      );
+    },
+  },
+  {
+    title: t('上级'),
+    key: 'relation',
+    render: (_, record) => relationTag(record, t),
   },
   {
     title: t('状态'),
     dataIndex: 'status',
     key: 'status',
     render: (status) => statusTag(status, t),
-  },
-  {
-    title: (
-      <Tooltip content={t('已分配金额：给下级分销商分配的可分发额度，可用与下级分发系统额度或可分发金额。')}>
-        <span>{t('已分配金额')}</span>
-      </Tooltip>
-    ),
-    dataIndex: 'allocated_amount',
-    key: 'allocated_amount',
-    render: (quota, record) => (isDistributor(record.role) ? renderQuota(quota || 0) : '-'),
-  },
-  {
-    title: (
-      <Tooltip content={t('已分配额度：给普通用户分配的系统额度，可用于大模型调用。')}>
-        <span>{t('已分配额度')}</span>
-      </Tooltip>
-    ),
-    dataIndex: 'allocated_quota',
-    key: 'allocated_quota',
-    render: (quota, record) => (record.role === 1 ? renderQuota(quota || 0) : '-'),
   },
   {
     title: t('备注'),
@@ -110,34 +189,45 @@ export const createDistributorColumns = ({ t, openGrant, openRemark, openLogs, s
     title: t('操作'),
     key: 'actions',
     fixed: 'right',
-    render: (_, record) => (
-      <Space wrap>
-        <Button size='small' type='tertiary' onClick={() => openGrant(record)}>
-          {isDistributor(record.role) ? t('添加金额') : t('添加额度')}
-        </Button>
-        <Button size='small' type='tertiary' onClick={() => openRemark(record)}>
-          {t('备注')}
-        </Button>
-        <Button size='small' type='tertiary' onClick={() => openLogs(record)}>
-          {t('记录')}
-        </Button>
-        {setDistributorRole && canSetSenior() && record.role !== 8 && (
-          <Button size='small' type='tertiary' onClick={() => confirmSetRole({ t, record, role: 8, setDistributorRole })}>
-            {t('设为高级分销商')}
+    width: 150,
+    render: (_, record) => {
+      const moreMenu = [
+        {
+          node: 'item',
+          name: t('记录'),
+          onClick: () => openLogs(record),
+        },
+        {
+          node: 'item',
+          name: t('备注'),
+          onClick: () => openRemark(record),
+        },
+        ...(setDistributorRole && canSetSenior() && record.role !== 8
+          ? [{ node: 'item', name: t('设为高级分销商'), onClick: () => confirmSetRole({ t, record, role: 8, setDistributorRole }) }]
+          : []),
+        ...(setDistributorRole && canSetDistributor() && record.role !== 7
+          ? [{ node: 'item', name: t('设为分销商'), onClick: () => confirmSetRole({ t, record, role: 7, setDistributorRole }) }]
+          : []),
+        ...(setDistributorRole && canSetDistributor() && record.role !== 1
+          ? [{ node: 'item', name: t('设为普通用户'), onClick: () => confirmSetRole({ t, record, role: 1, setDistributorRole }) }]
+          : []),
+      ];
+
+      return (
+        <Space>
+          <Button size='small' type='tertiary' onClick={() => openGrant(record)}>
+            {isDistributor(record.role) ? t('添加分销金额') : t('添加用户额度')}
           </Button>
-        )}
-        {setDistributorRole && canSetDistributor() && record.role !== 7 && (
-          <Button size='small' type='tertiary' onClick={() => confirmSetRole({ t, record, role: 7, setDistributorRole })}>
-            {t('设为分销商')}
-          </Button>
-        )}
-        {setDistributorRole && canSetDistributor() && record.role !== 1 && (
-          <Button size='small' type='tertiary' onClick={() => confirmSetRole({ t, record, role: 1, setDistributorRole })}>
-            {t('设为普通用户')}
-          </Button>
-        )}
-      </Space>
-    ),
+          <Dropdown
+            trigger='click'
+            position='bottomRight'
+            menu={moreMenu}
+          >
+            <Button size='small' type='tertiary' icon={<IconMore />} />
+          </Dropdown>
+        </Space>
+      );
+    },
   },
   ];
 

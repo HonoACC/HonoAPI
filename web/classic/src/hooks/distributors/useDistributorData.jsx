@@ -38,6 +38,11 @@ export const useDistributorData = () => {
   const [grantVisible, setGrantVisible] = useState(false);
   const [remarkVisible, setRemarkVisible] = useState(false);
   const [logsVisible, setLogsVisible] = useState(false);
+  const [logsPage, setLogsPage] = useState(1);
+  const [logsPageSize, setLogsPageSize] = useState(10);
+  const [logsTotal, setLogsTotal] = useState(0);
+  const [logsLoading, setLogsLoading] = useState(false);
+  const [logsTargetUserId, setLogsTargetUserId] = useState('');
   const [currentChild, setCurrentChild] = useState(null);
 
   const setChildFormat = (items) => {
@@ -157,8 +162,9 @@ export const useDistributorData = () => {
     return false;
   };
 
-  const loadLogs = async (targetUserId = '') => {
-    const params = new URLSearchParams({ p: 1, page_size: 20 });
+  const loadLogs = async (targetUserId = '', page = 1, size = 10) => {
+    setLogsLoading(true);
+    const params = new URLSearchParams({ p: page, page_size: size });
     if (targetUserId) params.set('target_user_id', targetUserId);
     const res = await API.get(`/api/distributor/operation-logs?${params.toString()}`);
     const { success, message, data } = res.data;
@@ -167,9 +173,12 @@ export const useDistributorData = () => {
         ...item,
         key: `${item.log_type || 'log'}-${item.id || index}`,
       })));
-      return;
+      setLogsPage(data.page || page);
+      setLogsTotal(data.total || 0);
+    } else {
+      showError(message);
     }
-    showError(message);
+    setLogsLoading(false);
   };
 
   const handlePageChange = (page) => {
@@ -195,8 +204,22 @@ export const useDistributorData = () => {
 
   const openLogs = async (child = null) => {
     setCurrentChild(child);
-    await loadLogs(child?.id || '');
+    const targetId = child?.id || '';
+    setLogsTargetUserId(targetId);
+    setLogsPage(1);
+    await loadLogs(targetId, 1, logsPageSize);
     setLogsVisible(true);
+  };
+
+  const handleLogsPageChange = (page) => {
+    setLogsPage(page);
+    loadLogs(logsTargetUserId, page, logsPageSize);
+  };
+
+  const handleLogsPageSizeChange = (size) => {
+    setLogsPageSize(size);
+    setLogsPage(1);
+    loadLogs(logsTargetUserId, 1, size);
   };
 
   useEffect(() => {
@@ -208,6 +231,10 @@ export const useDistributorData = () => {
     summary,
     children,
     logs,
+    logsLoading,
+    logsPage,
+    logsPageSize,
+    logsTotal,
     loading,
     activePage,
     pageSize,
@@ -239,5 +266,7 @@ export const useDistributorData = () => {
     openLogs,
     handlePageChange,
     handlePageSizeChange,
+    handleLogsPageChange,
+    handleLogsPageSizeChange,
   };
 };
