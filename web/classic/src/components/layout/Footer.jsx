@@ -46,13 +46,11 @@ const FooterBar = () => {
     () => ({
       [t('产品')]: [
         { name: t('功能'), href: '#features' },
-        { name: t('使用流程'), href: '#how-it-works' },
         { name: t('定价'), href: '/pricing' },
         { name: t('集成'), href: '#integrations' },
       ],
       [t('开发者')]: [
         { name: t('文档'), href: '/docs' },
-        { name: 'API Reference', href: '/docs' },
         { name: 'SDK', href: '/docs' },
         { name: t('状态'), href: '#' },
       ],
@@ -72,7 +70,7 @@ const FooterBar = () => {
 
   const socialLinks = [
     { name: 'Twitter', href: '#' },
-    { name: 'GitHub', href: 'https://github.com/QuantumNous/new-api' },
+    { name: 'GitHub', href: '#' },
   ];
 
   const customFooter = useMemo(
@@ -100,7 +98,7 @@ const FooterBar = () => {
 
                 <p className='text-semi-color-text-2 leading-relaxed mb-8 max-w-xs'>
                   {t(
-                    'The platform for teams who ship. Build, deploy, and scale with unprecedented velocity.',
+                    'One API Key to AI .',
                   )}
                 </p>
 

@@ -19,12 +19,7 @@ For commercial licensing, please contact support@quantumnous.com
 
 export const supportedLanguages = [
   'zh-CN',
-  'zh-TW',
   'en',
-  'fr',
-  'ru',
-  'ja',
-  'vi',
 ];
 
 export const normalizeLanguage = (language) => {
@@ -50,7 +45,7 @@ export const normalizeLanguage = (language) => {
     lower === 'zh-mo' ||
     lower.startsWith('zh-hant')
   ) {
-    return 'zh-TW';
+    return 'zh-CN';
   }
 
   const matchedLanguage = supportedLanguages.find(

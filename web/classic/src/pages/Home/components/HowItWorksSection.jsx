@@ -17,7 +17,7 @@ const endpoints = [
       { "role": "user", "content": "Hello" }
     ]
   }'`,
-    filename: 'chat_completions.sh',
+    filename: 'chat_completions',
   },
   {
     number: 'II',
@@ -32,7 +32,7 @@ const endpoints = [
     "input": "Explain quantum computing",
     "tools": [{ "type": "web_search" }]
   }'`,
-    filename: 'responses.sh',
+    filename: 'responses',
   },
   {
     number: 'III',
@@ -50,7 +50,7 @@ const endpoints = [
       { "role": "user", "content": "Hello" }
     ]
   }'`,
-    filename: 'messages.sh',
+    filename: 'messages',
   },
   {
     number: 'IV',
@@ -69,7 +69,7 @@ const endpoints = [
       ]}
     ]
   }'`,
-    filename: 'gemini.sh',
+    filename: 'gemini',
   },
 ];
 

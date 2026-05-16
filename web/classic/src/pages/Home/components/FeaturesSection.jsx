@@ -1,33 +1,29 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
-const features = [
+const getFeatures = (t) => [
   {
     number: '01',
-    title: '实时监控',
-    description:
-      '按量付费，实时监控使用情况.',
+    title: t('实时监控'),
+    description: t('按量付费，实时监控使用情况.'),
     visual: 'deploy',
   },
   {
     number: '02',
-    title: '能力聚合',
-    description:
-      '聚合市面上主流 AI 能力，通过一个 API Key 即可调用所有大模型.',
+    title: t('能力聚合'),
+    description: t('聚合市面上主流 AI 能力，通过一个 API Key 即可调用所有大模型.'),
     visual: 'ai',
   },
   {
     number: '03',
-    title: '团队协作',
-    description:
-      '多用户管理，灵活分配权限.',
+    title: t('团队协作'),
+    description: t('多用户管理，灵活分配权限.'),
     visual: 'collab',
   },
   {
     number: '04',
-    title: '隐私保护',
-    description:
-      '本站以保护用户隐私为己任，提供企业级安全性，绝不收集用户数据.',
+    title: t('隐私保护'),
+    description: t('本站以保护用户隐私为己任，提供企业级安全性，绝不收集用户数据.'),
     visual: 'security',
   },
 ];
@@ -221,6 +217,7 @@ function FeatureCard({ feature, index }) {
 
 const FeaturesSection = () => {
   const { t } = useTranslation();
+  const features = getFeatures(t);
   const [isVisible, setIsVisible] = useState(false);
   const sectionRef = useRef(null);
 
